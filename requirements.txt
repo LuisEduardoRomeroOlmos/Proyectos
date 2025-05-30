@@ -1,4 +1,4 @@
 streamlit==1.32.0
-tensorflow-cpu==2.16.1  # Usa la versión CPU para ahorrar memoria
-numpy==1.24.0
-Pillow>=10.0.0
+tensorflow-cpu>=2.10.0,<2.11.0  # Versión conocida compatible
+numpy==1.23.5  # Versión específica para TF 2.10
+Pillow==9.5.0
