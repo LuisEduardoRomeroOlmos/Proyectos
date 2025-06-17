@@ -54,8 +54,8 @@ with st.sidebar:
     st.markdown("""
     Esta app usa:
     - **Streamlit** para la interfaz web.
-    - **MobileNetV2** (modelo preentrenado en ImageNet).
+    - **MobileNetV2** (modelo preentrenado, sin modificacion).
     - **TensorFlow/Keras** para el procesamiento.
     """)
     st.markdown("---")
-    st.markdown("Código en [GitHub](https://github.com/tu-usuario/mi-app-streamlit)")
+    st.markdown("Código en [GitHub](https://github.com/LuisEduardoRomeroOlmos/Proyectos/tree/main)")

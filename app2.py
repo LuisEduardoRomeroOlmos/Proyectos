@@ -60,8 +60,8 @@ with st.sidebar:
     st.markdown("""
     Esta app usa:
     - **Streamlit** para la interfaz.
-    - **MobileNetV2 Fine-tuned** (modelo entrenado por ti).
-    - **TensorFlow/Keras** para la predicción.
+    - **MobileNetV2 Fine-tuned** (modelo entrenado por Lalo).
+    - **TensorFlow/Keras** para la predicción y Python 3.10.
     """)
     st.markdown("---")
-    st.markdown("Código en [GitHub](https://github.com/tu-usuario/mi-app-streamlit)")
+    st.markdown("Código en [GitHub](https://github.com/LuisEduardoRomeroOlmos/Proyectos/tree/main)")
