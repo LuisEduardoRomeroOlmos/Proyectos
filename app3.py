@@ -212,12 +212,21 @@ if uploaded_file is not None:
     
     if st.button("Clasificar"):
         with st.spinner("🔍 Analizando..."):
-            # (Aquí va todo tu código de procesamiento y predicción)
+            # Preprocesar imagen
+            img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
             
-            # Obtener info de Wikipedia
+            # Hacer predicción
+            predictions = modelo.predict(img_array)
+            predicted_class = np.argmax(predictions[0])
+            confidence = np.max(predictions[0]) * 100
+            
+            # Obtener nombre de la clase (DEFINIR class_name AQUÍ)
+            class_name = nombres_clases.get(predicted_class, f"Clase {predicted_class}")
+            
+            # Obtener info de Wikipedia (AHORA class_name ESTÁ DEFINIDA)
             wiki_info = obtener_info_wikipedia(class_name)
         
-        # Mostrar resultados en la columna derecha SIN afectar la imagen
+        # Mostrar resultados en la columna derecha
         with col_info:
             results_container = st.container()
             with results_container:
@@ -230,7 +239,7 @@ if uploaded_file is not None:
                     for i, idx in enumerate(top5):
                         st.write(f"{i+1}. {nombres_clases.get(idx, f'Clase {idx}')}: {predictions[0][idx]*100:.2f}%")
                 
-                # Info de Wikipedia (con acordeón)
+                # Info de Wikipedia
                 if wiki_info:
                     with st.expander(f"📚 Información sobre {wiki_info['titulo']}", expanded=True):
                         st.info(wiki_info["resumen"])
@@ -239,10 +248,6 @@ if uploaded_file is not None:
                         st.markdown(f"[📖 Artículo completo]({wiki_info['url']})")
                 else:
                     st.warning("No se encontró información adicional en Wikipedia")
-
-
-
-
 # Sidebar
 with st.sidebar:
     st.markdown("## ℹ️ Acerca de")
