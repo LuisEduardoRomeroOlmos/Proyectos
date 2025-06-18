@@ -201,53 +201,58 @@ uploaded_file = st.file_uploader("Elige una imagen de flor...", type=["jpg", "jp
 
 
 if uploaded_file is not None:
-    # Crear columnas principales
-    col_img, col_info = st.columns([1, 2])
+    # Dividir en dos columnas principales
+    col_upload, col_results = st.columns([1, 2])
     
-    with col_img:
-        # Mostrar imagen en un contenedor fijo
-        img_container = st.container()
-        with img_container:
-            st.image(uploaded_file, caption="Imagen subida", width=300)
+    with col_upload:
+        # Contenedor fijo para la imagen subida
+        upload_container = st.container(border=True)
+        with upload_container:
+            st.image(uploaded_file, 
+                   caption="Imagen subida", 
+                   width=300,
+                   use_column_width='auto')
+            st.markdown("---")
+            if st.button("Clasificar", key="classify_btn"):
+                # Almacenar el estado del botón
+                st.session_state['classified'] = True
     
-    if st.button("Clasificar"):
-        with st.spinner("🔍 Analizando..."):
-            # Preprocesar imagen
-            img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
+    # Columna de resultados (se actualiza solo al clasificar)
+    with col_results:
+        if st.session_state.get('classified'):
+            with st.spinner("🔍 Analizando..."):
+                # Procesamiento de la imagen
+                img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
+                predictions = modelo.predict(img_array)
+                predicted_class = np.argmax(predictions[0])
+                confidence = np.max(predictions[0]) * 100
+                class_name = nombres_clases.get(predicted_class, f"Clase {predicted_class}")
+                wiki_info = obtener_info_wikipedia(class_name)
             
-            # Hacer predicción
-            predictions = modelo.predict(img_array)
-            predicted_class = np.argmax(predictions[0])
-            confidence = np.max(predictions[0]) * 100
-            
-            # Obtener nombre de la clase (DEFINIR class_name AQUÍ)
-            class_name = nombres_clases.get(predicted_class, f"Clase {predicted_class}")
-            
-            # Obtener info de Wikipedia (AHORA class_name ESTÁ DEFINIDA)
-            wiki_info = obtener_info_wikipedia(class_name)
-        
-        # Mostrar resultados en la columna derecha
-        with col_info:
-            results_container = st.container()
+            # Mostrar resultados en contenedores organizados
+            results_container = st.container(border=True)
             with results_container:
+                # Sección de predicción principal
                 st.success(f"🌺 **Predicción:** {class_name}")
-                st.write(f"📊 **Confianza:** {confidence:.2f}%")
+                st.progress(int(confidence), text=f"📊 **Confianza:** {confidence:.2f}%")
                 
-                # Top 5 predicciones
-                with st.expander("🔝 Ver las 5 mejores coincidencias"):
+                # Acordeón para detalles
+                with st.expander("🔍 Detalles completos", expanded=True):
+                    # Top 5 predicciones
+                    st.markdown("### 🏆 Top 5 coincidencias")
                     top5 = np.argsort(predictions[0])[::-1][:5]
                     for i, idx in enumerate(top5):
-                        st.write(f"{i+1}. {nombres_clases.get(idx, f'Clase {idx}')}: {predictions[0][idx]*100:.2f}%")
-                
-                # Info de Wikipedia
-                if wiki_info:
-                    with st.expander(f"📚 Información sobre {wiki_info['titulo']}", expanded=True):
+                        st.write(f"{i+1}. {nombres_clases.get(idx)}: {predictions[0][idx]*100:.2f}%")
+                    
+                    # Info de Wikipedia
+                    if wiki_info:
+                        st.markdown(f"### 📚 {wiki_info['titulo']}")
                         st.info(wiki_info["resumen"])
                         if wiki_info["imagenes"]:
                             st.image(wiki_info["imagenes"][0], width=250)
-                        st.markdown(f"[📖 Artículo completo]({wiki_info['url']})")
-                else:
-                    st.warning("No se encontró información adicional en Wikipedia")
+                        st.markdown(f"[Leer más en Wikipedia]({wiki_info['url']})")
+                    else:
+                     st.warning("No se encontró información adicional en Wikipedia")
 # Sidebar
 with st.sidebar:
     st.markdown("## ℹ️ Acerca de")
