@@ -198,51 +198,50 @@ def obtener_info_wikipedia(flor_nombre):
 # Interfaz principal
 uploaded_file = st.file_uploader("Elige una imagen de flor...", type=["jpg", "jpeg", "png"])
 
+
+
 if uploaded_file is not None:
-    col1, col2 = st.columns([1, 2])
+    # Crear columnas principales
+    col_img, col_info = st.columns([1, 2])
     
-    with col1:
-        st.image(uploaded_file, caption="Imagen subida", width=300)
+    with col_img:
+        # Mostrar imagen en un contenedor fijo
+        img_container = st.container()
+        with img_container:
+            st.image(uploaded_file, caption="Imagen subida", width=300)
     
     if st.button("Clasificar"):
-        with st.spinner("🔍 Analizando la imagen y buscando información..."):
-            # Procesamiento de imagen
-            img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
-            
-            # Predicción
-            predictions = modelo.predict(img_array)
-            predicted_class = np.argmax(predictions[0])
-            confidence = np.max(predictions[0]) * 100
-            class_name = nombres_clases.get(predicted_class, f"Clase {predicted_class}")
+        with st.spinner("🔍 Analizando..."):
+            # (Aquí va todo tu código de procesamiento y predicción)
             
             # Obtener info de Wikipedia
             wiki_info = obtener_info_wikipedia(class_name)
         
-        # Mostrar resultados
-        with col2:
-            st.success(f"🌺 **Predicción:** {class_name}")
-            st.write(f"📊 **Confianza:** {confidence:.2f}%")
-            
-            # Top 5 predicciones
-            st.markdown("### 🔝 Top 5 predicciones:")
-            top5 = np.argsort(predictions[0])[::-1][:5]
-            for i, idx in enumerate(top5):
-                st.write(f"{i+1}. {nombres_clases.get(idx, f'Clase {idx}')}: {predictions[0][idx]*100:.2f}%")
-            
-            # Información de Wikipedia
-            if wiki_info:
-                st.markdown(f"### 📚 {wiki_info['titulo']}")
-                st.info(wiki_info["resumen"])
+        # Mostrar resultados en la columna derecha SIN afectar la imagen
+        with col_info:
+            results_container = st.container()
+            with results_container:
+                st.success(f"🌺 **Predicción:** {class_name}")
+                st.write(f"📊 **Confianza:** {confidence:.2f}%")
                 
-                if wiki_info["imagenes"]:
-                    try:
-                        st.image(wiki_info["imagenes"][0], width=300)
-                    except:
-                        pass
+                # Top 5 predicciones
+                with st.expander("🔝 Ver las 5 mejores coincidencias"):
+                    top5 = np.argsort(predictions[0])[::-1][:5]
+                    for i, idx in enumerate(top5):
+                        st.write(f"{i+1}. {nombres_clases.get(idx, f'Clase {idx}')}: {predictions[0][idx]*100:.2f}%")
                 
-                st.markdown(f"[📖 Artículo completo]({wiki_info['url']})")
-            else:
-                st.warning("No se encontró información en Wikipedia para esta flor.")
+                # Info de Wikipedia (con acordeón)
+                if wiki_info:
+                    with st.expander(f"📚 Información sobre {wiki_info['titulo']}", expanded=True):
+                        st.info(wiki_info["resumen"])
+                        if wiki_info["imagenes"]:
+                            st.image(wiki_info["imagenes"][0], width=250)
+                        st.markdown(f"[📖 Artículo completo]({wiki_info['url']})")
+                else:
+                    st.warning("No se encontró información adicional en Wikipedia")
+
+
+
 
 # Sidebar
 with st.sidebar:
