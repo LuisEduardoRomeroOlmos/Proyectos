@@ -178,9 +178,9 @@ with st.sidebar:
     st.markdown("## ℹ️ Acerca de")
     st.markdown("""
     Esta app usa:
-    - **Streamlit** para la interfaz
     - Modelo entrenado en el dataset **Oxford Flowers 102**
     - **TensorFlow/Keras** para la predicción
+    - **Creador** El Lalo
     """)
     st.markdown("---")
     st.markdown("Código en [GitHub](https://github.com/LuisEduardoRomeroOlmos/Proyectos/tree/main)")
