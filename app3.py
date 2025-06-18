@@ -198,11 +198,9 @@ def obtener_info_wikipedia(flor_nombre):
 # Interfaz principal
 uploaded_file = st.file_uploader("Elige una imagen de flor...", type=["jpg", "jpeg", "png"])
 
-
-
 if uploaded_file is not None:
-    # Dividir en dos columnas principales
-    col_upload, col_results = st.columns([1, 2])
+    # Dividir en dos columnas principales con espacio entre ellas
+    col_upload, col_results = st.columns([1, 2], gap="large")
     
     with col_upload:
         # Contenedor fijo para la imagen subida
@@ -211,16 +209,14 @@ if uploaded_file is not None:
             st.image(uploaded_file, 
                    caption="Imagen subida", 
                    width=300,
-                   use_column_width='auto')
+                   use_container_width=True)  # ¡Parámetro actualizado aquí!
             st.markdown("---")
-            if st.button("Clasificar", key="classify_btn"):
-                # Almacenar el estado del botón
-                st.session_state['classified'] = True
+            classify_btn = st.button("🪄 Clasificar", type="primary", use_container_width=True)
     
-    # Columna de resultados (se actualiza solo al clasificar)
+    # Columna de resultados
     with col_results:
-        if st.session_state.get('classified'):
-            with st.spinner("🔍 Analizando..."):
+        if classify_btn:  # Solo se ejecuta al presionar el botón
+            with st.spinner("Analizando la imagen..."):
                 # Procesamiento de la imagen
                 img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
                 predictions = modelo.predict(img_array)
@@ -229,30 +225,32 @@ if uploaded_file is not None:
                 class_name = nombres_clases.get(predicted_class, f"Clase {predicted_class}")
                 wiki_info = obtener_info_wikipedia(class_name)
             
-            # Mostrar resultados en contenedores organizados
-            results_container = st.container(border=True)
-            with results_container:
-                # Sección de predicción principal
-                st.success(f"🌺 **Predicción:** {class_name}")
-                st.progress(int(confidence), text=f"📊 **Confianza:** {confidence:.2f}%")
-                
-                # Acordeón para detalles
-                with st.expander("🔍 Detalles completos", expanded=True):
-                    # Top 5 predicciones
-                    st.markdown("### 🏆 Top 5 coincidencias")
-                    top5 = np.argsort(predictions[0])[::-1][:5]
-                    for i, idx in enumerate(top5):
-                        st.write(f"{i+1}. {nombres_clases.get(idx)}: {predictions[0][idx]*100:.2f}%")
-                    
-                    # Info de Wikipedia
-                    if wiki_info:
-                        st.markdown(f"### 📚 {wiki_info['titulo']}")
-                        st.info(wiki_info["resumen"])
-                        if wiki_info["imagenes"]:
-                            st.image(wiki_info["imagenes"][0], width=250)
-                        st.markdown(f"[Leer más en Wikipedia]({wiki_info['url']})")
-                    else:
-                     st.warning("No se encontró información adicional en Wikipedia")
+            # Contenedor de resultados con pestañas
+            result_tabs = st.tabs(["🔮 Predicción", "📊 Detalles", "🌍 Wikipedia"])
+            
+            with result_tabs[0]:  # Pestaña de predicción principal
+                st.success(f"**{class_name}**")
+                st.metric("Confianza", f"{confidence:.2f}%")
+                st.image(uploaded_file, use_container_width=True)
+            
+            with result_tabs[1]:  # Pestaña de detalles técnicos
+                st.subheader("Top 5 predicciones")
+                top5 = np.argsort(predictions[0])[::-1][:5]
+                for i, idx in enumerate(top5):
+                    st.progress(
+                        float(predictions[0][idx]),
+                        text=f"{i+1}. {nombres_clases.get(idx)}: {predictions[0][idx]*100:.2f}%"
+                    )
+            
+            with result_tabs[2]:  # Pestaña de Wikipedia
+                if wiki_info:
+                    st.subheader(wiki_info['titulo'])
+                    st.write(wiki_info["resumen"])
+                    if wiki_info["imagenes"]:
+                        st.image(wiki_info["imagenes"][0], use_container_width=True)
+                    st.page_link(wiki_info['url'], label="📖 Ver artículo completo")
+                else:
+                    st.warning("Información no encontrada en Wikipedia")
 # Sidebar
 with st.sidebar:
     st.markdown("## ℹ️ Acerca de")
