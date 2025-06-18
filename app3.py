@@ -4,7 +4,7 @@ from PIL import Image
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
-import wikipediaapi
+import wikipedia
 import time
 
 # Configuración de la página
