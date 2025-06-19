@@ -140,7 +140,7 @@ def cargar_nombres_clases_oficial_es():
     }
 
 
-nombres_clases = cargar_nombres_clases()
+nombres_clases = cargar_nombres_clases_oficial_es()
 
 def obtener_info_wikipedia(flor_nombre):
     try:
