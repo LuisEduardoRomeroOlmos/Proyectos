@@ -33,12 +33,12 @@ def cargar_modelo():
 modelo = cargar_modelo()
 
 @st.cache_data
-def cargar_nombres_clases():
+def cargar_nombres_clases_oficial_es():
     return {
         0: "Prímula rosa",
-        1: "Orquídea de bolsillo de hojas duras",
+        1: "Orquídea de hojas duras",
         2: "Campanas de Canterbury",
-        3: "Guisante de olor",
+        3: "Guisante dulce",
         4: "Caléndula inglesa",
         5: "Lirio tigre",
         6: "Orquídea luna",
@@ -46,31 +46,31 @@ def cargar_nombres_clases():
         8: "Acónito",
         9: "Cardo globo",
         10: "Boca de dragón",
-        11: "Fárfara",
+        11: "Farfara",
         12: "Protea rey",
-        13: "Cardo",
-        14: "Lirio amarillo",
-        15: "Trollius",
-        16: "Equinácea púrpura",
+        13: "Cardo lanzador",
+        14: "Iris amarillo",
+        15: "Flor globo",
+        16: "Echinácea púrpura",
         17: "Lirio peruano",
-        18: "Musgo bola",
-        19: "Lirio de arum gigante blanco",
+        18: "Flor globo (balloon flower)",
+        19: "Lirio arum gigante blanco",
         20: "Lirio de fuego",
-        21: "Flor de alfiler",
+        21: "Flor alfiler",
         22: "Fritilaria",
         23: "Jengibre rojo",
         24: "Jacinto de uva",
-        25: "Amapola silvestre",
+        25: "Amapola del campo",
         26: "Plumas del príncipe de Gales",
         27: "Genciana sin tallo",
         28: "Alcachofa",
-        29: "Clavel del poeta",
+        29: "Dianthus barbatus (Clavel del poeta)",
         30: "Clavel",
-        31: "Flox de jardín",
+        31: "Flores de jardín (Phlox)",
         32: "Amor en la niebla",
         33: "Aster mexicano",
-        34: "Erizo de mar alpino",
-        35: "Orquídea cattleya de labios rubí",
+        34: "Eryngium alpino",
+        35: "Orquídea cattleya",
         36: "Flor del cabo",
         37: "Astrantia mayor",
         38: "Tulipán siamés",
@@ -128,7 +128,7 @@ def cargar_nombres_clases():
         90: "Amarilis",
         91: "Bálsamo de abeja",
         92: "Flor globo",
-        93: "Margarita africana",
+        93: "Gallardia",
         94: "Dedalera",
         95: "Buganvilla",
         96: "Camelia",
@@ -138,6 +138,7 @@ def cargar_nombres_clases():
         100: "Gallardia",
         101: "Enredadera trompeta"
     }
+
 
 nombres_clases = cargar_nombres_clases()
 
