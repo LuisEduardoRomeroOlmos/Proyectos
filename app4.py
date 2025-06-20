@@ -108,7 +108,7 @@ if uploaded_file is not None:
         with st.container(border=True):
             st.image(uploaded_file, caption="Imagen subida", width=300, use_container_width=True)
             st.markdown("---")
-            classify_btn = st.button("🪄 Clasificar", type="primary", use_container_width=True)
+            classify_btn = st.button("🔎 Analizar", type="primary", use_container_width=True)
 
     with col_results:
         if classify_btn:
