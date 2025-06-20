@@ -11,7 +11,7 @@ st.set_page_config(page_title="🦴 Clasificador de Razas de Perros", layout="wi
 
 st.title("🐶 Clasificador de Perros 🐾")
 st.markdown("""
-Sube una imagen de un perro y el modelo predecirá a cuál de las 120 razas del dataset Stanford Dogs pertenece,
+Sube una imagen de tu lomito y el modelo predecirá a cuál de las 120 razas del dataset Stanford Dogs pertenece,
 mostrando además información relevante de Wikipedia.
 """)
 

@@ -11,7 +11,7 @@ st.set_page_config(page_title="Clasificador Gato vs Perro", layout="wide")
 # Título y descripción
 st.title("🐶🐱 Clasificador Gato vs Perro")
 st.markdown("""
-Sube una imagen y tu modelo personalizado (MobileNetV2 + Fine Tuning) predecirá si es un **gato** o un **perro**.
+Sube una imagen de tu mascota y el modelo  predecirá si es un **gato** o un **perro**.
 """)
 
 # Función para cargar y preprocesar imagen desde un archivo subido
