@@ -109,7 +109,17 @@ def obtener_info_wikipedia(nombre):
 
 
 def obtener_heatmap_gradcam(img_array, modelo, clase_idx):
-    # Buscar recursivamente la última capa Conv2D
+    # Detectar la última capa Conv2D dentro de MobileNetV2 (modelo base)
+    base_model = None
+    # Buscamos dentro de capas anidadas
+    for layer in modelo.layers:
+        if hasattr(layer, "layers"):  # submodelo
+            base_model = layer
+            break
+    if base_model is None:
+        base_model = modelo  # si no tiene submodelo, usar modelo directamente
+
+    # Buscar última Conv2D en el base_model
     def buscar_ultima_conv2d(layer):
         if isinstance(layer, tf.keras.layers.Conv2D):
             return layer.name
@@ -120,13 +130,15 @@ def obtener_heatmap_gradcam(img_array, modelo, clase_idx):
                     return name
         return None
 
-    ultima_capa_conv = buscar_ultima_conv2d(modelo)
+    ultima_capa_conv = buscar_ultima_conv2d(base_model)
     if ultima_capa_conv is None:
         st.error("No se encontró una capa Conv2D en el modelo.")
         return None
 
+    inputs = modelo.input if hasattr(modelo, 'input') else modelo.inputs[0]
+
     grad_model = tf.keras.models.Model(
-        inputs=modelo.input,
+        inputs=inputs,
         outputs=[modelo.get_layer(ultima_capa_conv).output, modelo.output]
     )
 
