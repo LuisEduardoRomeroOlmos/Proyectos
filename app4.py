@@ -127,8 +127,9 @@ if uploaded_file is not None:
             result_tabs = st.tabs(["📚 Análisis", "📊 Top 5", "🌍 Wikipedia"])
 
             with result_tabs[0]:
-                st.markdown(f"### 🐺 Raza detectada: {class_name}")
-                st.metric("Confianza", f"{confidence:.2f}%")
+                
+                st.success(f"🐺 Es de raza **{class_name}**")
+                st.write(f"🔢 Confianza del modelo: **{confidence:.2f}%**")
 
             with result_tabs[1]:
                 st.subheader("Mejores 5 Coincidencias: ")

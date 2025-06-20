@@ -42,7 +42,7 @@ if uploaded_file is not None:
 
     with col_result:
         if st.button("Clasificar"):
-            st.write("🔍 Clasificando con modelo fine-tuned...")
+            st.write("🔍 Analizando ...")
 
             # Preprocesar la imagen
             img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
