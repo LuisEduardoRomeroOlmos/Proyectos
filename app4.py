@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing import image
 import wikipedia
 
 # Configuración de la página
-st.set_page_config(page_title="Clasificador de Razas de Perros", layout="wide")
+st.set_page_config(page_title="🦴 Clasificador de Razas de Perros", layout="wide")
 
 st.title("🐶 Clasificador de Perros 🐾")
 st.markdown("""
@@ -124,14 +124,14 @@ if uploaded_file is not None:
                     st.error(f"Ocurrió un error en la predicción: {e}")
                     st.stop()
 
-            result_tabs = st.tabs(["🔮 Predicción", "📊 Detalles", "🌍 Wikipedia"])
+            result_tabs = st.tabs(["📚 Análisis", "📊 Top 5", "🌍 Wikipedia"])
 
             with result_tabs[0]:
-                st.markdown(f"### 🐶 Raza detectada: {class_name}")
+                st.markdown(f"### 🐺 Raza detectada: {class_name}")
                 st.metric("Confianza", f"{confidence:.2f}%")
 
             with result_tabs[1]:
-                st.subheader("Top 5 predicciones")
+                st.subheader("Mejores 5 Coincidencias: ")
                 top5 = np.argsort(predictions[0])[::-1][:5]
                 for i, idx in enumerate(top5):
                     nombre = nombres_clases.get(idx, f"Clase {idx}")

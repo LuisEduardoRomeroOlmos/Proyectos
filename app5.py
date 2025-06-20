@@ -189,7 +189,7 @@ if uploaded_file is not None:
                     st.error(f"Ocurrió un error en la predicción: {e}")
                     st.stop()
 
-            result_tabs = st.tabs(["🔮 Predicción", "📊 Top 5", "🌍 Wikipedia", "🖼️ Grad-CAM", "📥 Descargar"])
+            result_tabs = st.tabs(["📚 Análisis", "📊 Top 5", "🌍 Wikipedia", "🖼️ Grad-CAM", "📥 Descargar"])
 
             with result_tabs[0]:
                 st.markdown(f"### 🐶 Raza detectada: {class_name}")
