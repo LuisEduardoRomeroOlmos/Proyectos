@@ -38,7 +38,7 @@ if uploaded_file is not None:
     col_img, col_result = st.columns([1, 1], gap="large")
 
     with col_img:
-        st.image(uploaded_file, caption="Imagen subida", use_column_width=True)
+        st.image(uploaded_file, caption="Imagen subida", use_container_width=True)
 
     with col_result:
         if st.button("Clasificar"):
