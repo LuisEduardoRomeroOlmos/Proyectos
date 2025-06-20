@@ -8,6 +8,8 @@ from tensorflow.keras.preprocessing import image
 import wikipedia
 import io
 from fpdf import FPDF
+import matplotlib.cm as cm
+
 
 # Configuración
 st.set_page_config(page_title="Clasificador de Razas de Perros", layout="wide")
@@ -105,16 +107,23 @@ def obtener_info_wikipedia(nombre):
 
 # Grad-CAM (estructura inicial, requiere implementación real)
 
-def obtener_heatmap_gradcam(img_array, modelo, clase_idx, ultima_capa_conv=None):
-    # Usa la última capa convolucional automáticamente si no se da nombre
+
+def obtener_heatmap_gradcam(img_array, modelo, clase_idx):
+    # Buscar recursivamente la última capa Conv2D
+    def buscar_ultima_conv2d(layer):
+        if isinstance(layer, tf.keras.layers.Conv2D):
+            return layer.name
+        if hasattr(layer, 'layers'):
+            for sublayer in reversed(layer.layers):
+                name = buscar_ultima_conv2d(sublayer)
+                if name:
+                    return name
+        return None
+
+    ultima_capa_conv = buscar_ultima_conv2d(modelo)
     if ultima_capa_conv is None:
-        for layer in reversed(modelo.layers):
-            if isinstance(layer, tf.keras.layers.Conv2D):
-                ultima_capa_conv = layer.name
-                break
-        if ultima_capa_conv is None:
-            st.error("No se encontró una capa Conv2D en el modelo.")
-            return None
+        st.error("No se encontró una capa Conv2D en el modelo.")
+        return None
 
     grad_model = tf.keras.models.Model(
         inputs=modelo.input,
@@ -127,17 +136,16 @@ def obtener_heatmap_gradcam(img_array, modelo, clase_idx, ultima_capa_conv=None)
 
     grads = tape.gradient(loss, conv_outputs)[0]
     conv_outputs = conv_outputs[0]
-
     weights = tf.reduce_mean(grads, axis=(0, 1))
-    cam = np.zeros(conv_outputs.shape[0:2], dtype=np.float32)
 
+    cam = np.zeros(conv_outputs.shape[0:2], dtype=np.float32)
     for i, w in enumerate(weights):
         cam += w * conv_outputs[:, :, i]
 
     cam = np.maximum(cam, 0)
     cam = cam / cam.max() if cam.max() != 0 else cam
-    cam = Image.fromarray(np.uint8(cm.jet(cam.numpy()) * 255)).resize((224, 224))
-    return cam
+    heatmap = Image.fromarray(np.uint8(cm.jet(cam.numpy()) * 255)).resize((224, 224))
+    return heatmap
 
 # Historial
 if "historial" not in st.session_state:
