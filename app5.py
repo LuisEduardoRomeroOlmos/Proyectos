@@ -104,8 +104,40 @@ def obtener_info_wikipedia(nombre):
         return None
 
 # Grad-CAM (estructura inicial, requiere implementación real)
-def obtener_heatmap_gradcam(img_array, modelo, clase_idx):
-    return None  # se implementaría con tf.GradientTape, opcional
+
+def obtener_heatmap_gradcam(img_array, modelo, clase_idx, ultima_capa_conv=None):
+    # Usa la última capa convolucional automáticamente si no se da nombre
+    if ultima_capa_conv is None:
+        for layer in reversed(modelo.layers):
+            if isinstance(layer, tf.keras.layers.Conv2D):
+                ultima_capa_conv = layer.name
+                break
+        if ultima_capa_conv is None:
+            st.error("No se encontró una capa Conv2D en el modelo.")
+            return None
+
+    grad_model = tf.keras.models.Model(
+        inputs=modelo.input,
+        outputs=[modelo.get_layer(ultima_capa_conv).output, modelo.output]
+    )
+
+    with tf.GradientTape() as tape:
+        conv_outputs, predictions = grad_model(img_array)
+        loss = predictions[:, clase_idx]
+
+    grads = tape.gradient(loss, conv_outputs)[0]
+    conv_outputs = conv_outputs[0]
+
+    weights = tf.reduce_mean(grads, axis=(0, 1))
+    cam = np.zeros(conv_outputs.shape[0:2], dtype=np.float32)
+
+    for i, w in enumerate(weights):
+        cam += w * conv_outputs[:, :, i]
+
+    cam = np.maximum(cam, 0)
+    cam = cam / cam.max() if cam.max() != 0 else cam
+    cam = Image.fromarray(np.uint8(cm.jet(cam.numpy()) * 255)).resize((224, 224))
+    return cam
 
 # Historial
 if "historial" not in st.session_state:
