@@ -11,7 +11,7 @@ st.set_page_config(page_title="Clasificador Gato vs Perro", layout="wide")
 # Título y descripción
 st.title("🐶🐱 Clasificador Gato vs Perro")
 st.markdown("""
-Sube una imagen de tu mascota y el modelo  predecirá si es un **gato** o un **perro**.
+Sube una imagen de tu mascota y el modelo predecirá si es un **gato** o un **perro**.
 """)
 
 # Función para cargar y preprocesar imagen desde un archivo subido
@@ -34,25 +34,29 @@ modelo = cargar_modelo()
 uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Mostrar la imagen subida
-    st.image(uploaded_file, caption="Imagen subida", width=300)
+    # Crear columnas para imagen y resultado
+    col_img, col_result = st.columns([1, 1], gap="large")
 
-    if st.button("Clasificar"):
-        st.write("🔍 Clasificando con modelo fine-tuned...")
+    with col_img:
+        st.image(uploaded_file, caption="Imagen subida", use_column_width=True)
 
-        # Preprocesar
-        img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
+    with col_result:
+        if st.button("Clasificar"):
+            st.write("🔍 Clasificando con modelo fine-tuned...")
 
-        # Hacer predicción
-        prediction = modelo.predict(img_array)
+            # Preprocesar la imagen
+            img_array = cargar_preprocesar_imagen_desde_bytes(uploaded_file)
 
-        # Interpretar resultado
-        clase = "🐶 Es un **perro**" if prediction[0][0] > 0.5 else "🐱 Es un **gato**"
-        probabilidad = prediction[0][0] * 100 if prediction[0][0] > 0.5 else (1 - prediction[0][0]) * 100
+            # Hacer predicción
+            prediction = modelo.predict(img_array)
 
-        # Mostrar resultado
-        st.success(clase)
-        st.write(f"🔢 Confianza del modelo: **{probabilidad:.2f}%**")
+            # Interpretar resultado
+            clase = "🐶 Es un **perro**" if prediction[0][0] > 0.5 else "🐱 Es un **gato**"
+            probabilidad = prediction[0][0] * 100 if prediction[0][0] > 0.5 else (1 - prediction[0][0]) * 100
+
+            # Mostrar resultado
+            st.success(clase)
+            st.write(f"🔢 Confianza del modelo: **{probabilidad:.2f}%**")
 
 # Sidebar con info adicional
 with st.sidebar:
@@ -60,7 +64,7 @@ with st.sidebar:
     st.markdown("""
     Esta app usa:
     - **Streamlit** para la interfaz.
-    - **MobileNetV2 Fine-tuned** (modelo entrenado por Lalo).
+    - **MobileNetV2 Fine-tuned** .
     - **TensorFlow/Keras** para la predicción y Python 3.10.
     """)
     st.markdown("---")
