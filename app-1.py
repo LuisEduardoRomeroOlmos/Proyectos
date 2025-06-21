@@ -33,12 +33,15 @@ if uploaded_file is not None:
     if st.button("Clasificar"):
         st.write("🔍 Analizando...")
 
+        
+
         # Preprocesar imagen
-        image = image.resize((224, 224))  # Tamaño para EfficientNetB0
-        image_array = np.array(image)
+        image = image.convert("RGB")  # Elimina canal alfa si lo hay
+        image = image.resize((224, 224))
+        image_array = np.array(image).astype("float32")  # Asegura tipo correcto
         image_array = preprocess_input(image_array)
         image_array = np.expand_dims(image_array, axis=0)
-
+        
         # Predicción
         predictions = model.predict(image_array)
         decoded_predictions = decode_predictions(predictions, top=3)[0]
