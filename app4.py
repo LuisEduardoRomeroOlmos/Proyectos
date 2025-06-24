@@ -4,6 +4,7 @@ from PIL import Image
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.efficientnet import preprocess_input
 import wikipedia
 
 # Configuración de la página
@@ -18,12 +19,19 @@ mostrando además información relevante de Wikipedia.
 wikipedia.set_lang("es")
 
 # --- Funciones ---
+#def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(300, 300)):
+ #   img = Image.open(file).convert("RGB")
+  #  img = img.resize(tamanio)
+   # img_array = image.img_to_array(img)
+    #img_array = np.expand_dims(img_array, axis=0)
+    #img_array = img_array / 255.0
+    #return img_array
 def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(300, 300)):
     img = Image.open(file).convert("RGB")
     img = img.resize(tamanio)
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
+    img_array = preprocess_input(img_array)  # ⚠️ cambio importante
     return img_array
 
 @st.cache_resource
