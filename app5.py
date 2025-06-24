@@ -25,7 +25,7 @@ idioma = st.selectbox("🌐 Idioma de Wikipedia", ["es", "en"])
 wikipedia.set_lang(idioma)
 
 # Carga y preprocesamiento
-def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(300, 300)):
+def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(224, 224)):
     img = Image.open(file).convert("RGB")
     img = img.resize(tamanio)
     img_array = image.img_to_array(img)

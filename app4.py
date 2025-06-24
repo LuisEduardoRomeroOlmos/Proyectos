@@ -18,7 +18,7 @@ mostrando además información relevante de Wikipedia.
 wikipedia.set_lang("es")
 
 # --- Funciones ---
-def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(224, 224)):
+def cargar_preprocesar_imagen_desde_bytes(file, tamanio=(300, 300)):
     img = Image.open(file).convert("RGB")
     img = img.resize(tamanio)
     img_array = image.img_to_array(img)
