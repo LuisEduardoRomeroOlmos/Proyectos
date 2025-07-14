@@ -29,4 +29,4 @@ if uploaded_file is not None:
     # Grad-CAM
     heatmap = make_gradcam_heatmap(np.expand_dims(img_array, axis=0), model, last_conv_layer_name="top_conv")
     gradcam_image = save_and_display_gradcam(image, heatmap)
-    st.image(gradcam_image, caption="Grad-CAM", use_column_width=True)
+    st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
