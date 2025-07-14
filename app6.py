@@ -30,11 +30,12 @@ if uploaded_file is not None:
     base_model = model.layers[0]
     last_conv_layer = base_model.get_layer("top_conv")
 
-    from tensorflow.keras.models import Model
+
     gradcam_model = Model(
-        inputs=model.input,
-        outputs=[last_conv_layer.output, model.output]
+    inputs=base_model.input,        # entrada del base_model (EfficientNetB3)
+    outputs=[last_conv_layer.output, model.output]
     )
+
 
     # Generar heatmap con gradcam_model
     heatmap = make_gradcam_heatmap(
