@@ -1,7 +1,7 @@
 import numpy as np
-import tensorflow as tf
-import cv2
 from PIL import Image
+import matplotlib.cm as cm
+import tensorflow as tf
 
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
     grad_model = tf.keras.models.Model(
@@ -20,10 +20,14 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
     return heatmap.numpy()
 
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
-    img = np.array(img.resize((300, 300)))
-    heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+    img = img.resize((300, 300))
     heatmap = np.uint8(255 * heatmap)
-    heatmap_color = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    superimposed_img = heatmap_color * alpha + img
-    superimposed_img = np.clip(superimposed_img, 0, 255).astype(np.uint8)
+
+    colormap = cm.get_cmap('jet')
+    heatmap_color = colormap(heatmap / 255.0)[:, :, :3]  # solo RGB, sin alpha
+    heatmap_color = np.uint8(heatmap_color * 255)
+
+    superimposed_img = np.array(img) * (1 - alpha) + heatmap_color * alpha
+    superimposed_img = np.uint8(superimposed_img)
+
     return Image.fromarray(superimposed_img)
