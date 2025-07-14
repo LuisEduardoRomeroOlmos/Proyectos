@@ -15,18 +15,32 @@ uploaded_file = st.file_uploader("Sube una imagen de la piel", type=["jpg", "jpe
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Imagen subida", use_column_width=True)
+    st.image(image, caption="Imagen subida", use_container_width=True)  # usa use_container_width
 
-    # Preprocesar
+    # Preprocesar imagen
     img_array = preprocess_image(image)
 
-    # Predicción
+    # Predicción normal con modelo completo
     pred = model.predict(np.expand_dims(img_array, axis=0))[0][0]
     label = "Melanoma" if pred >= 0.5 else "No Melanoma"
     conf = pred if pred >= 0.5 else 1 - pred
     st.write(f"**Predicción:** {label} ({conf*100:.2f}%)")
 
-    # Grad-CAM
-    heatmap = make_gradcam_heatmap(np.expand_dims(img_array, axis=0), model, last_conv_layer_name="top_conv")
+    # Preparar modelo para Grad-CAM
+    base_model = model.layers[0]
+    last_conv_layer = base_model.get_layer("top_conv")
+
+    from tensorflow.keras.models import Model
+    gradcam_model = Model(
+        inputs=model.input,
+        outputs=[last_conv_layer.output, model.output]
+    )
+
+    # Generar heatmap con gradcam_model
+    heatmap = make_gradcam_heatmap(
+        np.expand_dims(img_array, axis=0),
+        gradcam_model,
+        last_conv_layer_name=None  # porque ya se define en las salidas
+    )
     gradcam_image = save_and_display_gradcam(image, heatmap)
     st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
