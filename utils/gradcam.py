@@ -4,22 +4,25 @@ import matplotlib.cm as cm
 import tensorflow as tf
 
 def make_gradcam_heatmap(img_array, model):
-    # model devuelve [conv_output, preds]
-    conv_output, predictions = model(img_array, training=False)
-    pred_index = tf.argmax(predictions[0])
-
+    """
+    img_array: imagen preprocesada con shape (1, H, W, 3)
+    model: modelo con 2 salidas: [conv_outputs, predictions]
+    """
     with tf.GradientTape() as tape:
-        conv_output, predictions = model(img_array)
+        conv_outputs, predictions = model(img_array, training=False)
+        pred_index = tf.argmax(predictions[0])
         class_channel = predictions[:, pred_index]
 
-    grads = tape.gradient(class_channel, conv_output)
+    grads = tape.gradient(class_channel, conv_outputs)
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
-    conv_output = conv_output[0]
 
-    heatmap = conv_output @ pooled_grads[..., tf.newaxis]
+    conv_outputs = conv_outputs[0]
+    heatmap = conv_outputs @ pooled_grads[..., tf.newaxis]
     heatmap = tf.squeeze(heatmap)
-    heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
-    return heatmap.numpy()
+    heatmap = tf.maximum(heatmap, 0) / (tf.math.reduce_max(heatmap) + 1e-10)
+    heatmap = heatmap.numpy()
+
+    return heatmap
     
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
     img = img.resize((300, 300))
