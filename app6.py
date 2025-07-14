@@ -4,6 +4,7 @@ import tensorflow as tf
 from PIL import Image
 from utils.gradcam import make_gradcam_heatmap, save_and_display_gradcam
 from utils.preprocessing import preprocess_image
+from tensorflow.keras.models import Model
 
 # Carga del modelo
 model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
