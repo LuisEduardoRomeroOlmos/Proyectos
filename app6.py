@@ -6,9 +6,22 @@ from utils.gradcam import make_gradcam_heatmap, save_and_display_gradcam
 from utils.preprocessing import preprocess_image
 from tensorflow.keras.models import Model
 
-# Carga del modelo completo
+# Carga del modelo entrenado completo
 model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
 
+# Obtener la base (EfficientNetB3)
+base_model = model.get_layer("efficientnetb3")
+
+# Capa convolucional final dentro de EfficientNetB3
+last_conv_layer = base_model.get_layer("top_conv")
+
+# Crear modelo para Grad-CAM
+gradcam_model = Model(
+    inputs=base_model.input,
+    outputs=[last_conv_layer.output, model.output]
+)
+
+# Configurar Streamlit
 st.set_page_config(page_title="Detección de Melanoma", layout="centered")
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
 
@@ -28,20 +41,11 @@ if uploaded_file is not None:
     st.write(f"**Predicción:** {label} ({conf*100:.2f}%)")
 
     # Grad-CAM
-    base_model = model.layers[0]  # EfficientNetB3
-    last_conv_layer = base_model.get_layer("top_conv")
-
-    # Crear modelo para Grad-CAM: usa input y output del modelo completo
-    gradcam_model = Model(
-        inputs=model.input,
-        outputs=[last_conv_layer.output, model.output]
-    )
-
-    # Generar heatmap
     heatmap = make_gradcam_heatmap(
         np.expand_dims(img_array, axis=0),
-        gradcam_model
+        gradcam_model,
+        last_conv_layer_name=None  # Ya está en las salidas
     )
-
     gradcam_image = save_and_display_gradcam(image, heatmap)
     st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
+
