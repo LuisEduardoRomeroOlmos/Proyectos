@@ -6,25 +6,25 @@ from tensorflow.keras.models import Model
 from utils.gradcam import make_gradcam_heatmap, save_and_display_gradcam
 from utils.preprocessing import preprocess_image
 
-# --- Cargar el modelo completo ---
+# Carga modelo completo (Sequential)
 model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
+
+# Extrae base_model (EfficientNet)
 base_model = model.layers[0]
 
-# Forzar ejecución para construir el modelo (muy importante en Streamlit/Cloud)
+# Forzar llamada para inicializar shapes y atributos internos
 dummy_input = np.zeros((1, 300, 300, 3), dtype=np.float32)
-_ = model(dummy_input)  # Construye todos los outputs
+_ = model(dummy_input)
 
-# Ahora podemos acceder a las capas y sus outputs
+# Obtener última capa convolucional del base_model
 last_conv_layer = base_model.get_layer("top_conv")
 
-# Crear modelo Grad-CAM con entrada del modelo base y salidas deseadas
+# Construir modelo GradCAM
 gradcam_model = Model(
-    inputs=base_model.input,
-    outputs=[last_conv_layer.output, model.output]
+    inputs=model.layers[0].input,
+    outputs=[last_conv_layer.output, model.layers[-1].output]
 )
 
-# --- Interfaz Streamlit ---
-st.set_page_config(page_title="Detección de Melanoma", layout="centered")
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
 
 uploaded_file = st.file_uploader("Sube una imagen de la piel", type=["jpg", "jpeg", "png"])
@@ -35,17 +35,19 @@ if uploaded_file is not None:
 
     # Preprocesar imagen
     img_array = preprocess_image(image)
-    input_tensor = np.expand_dims(img_array, axis=0)
 
-    # Predicción
-    pred = model.predict(input_tensor)[0][0]
+    # Predicción con modelo completo
+    pred = model.predict(np.expand_dims(img_array, axis=0))[0][0]
     label = "Melanoma" if pred >= 0.5 else "No Melanoma"
     conf = pred if pred >= 0.5 else 1 - pred
-    st.markdown(f"**Predicción:** {label} ({conf*100:.2f}%)")
+    st.write(f"**Predicción:** {label} ({conf*100:.2f}%)")
 
     # Generar heatmap Grad-CAM
-    heatmap = make_gradcam_heatmap(input_tensor, gradcam_model)
+    heatmap = make_gradcam_heatmap(
+        np.expand_dims(img_array, axis=0),
+        gradcam_model
+    )
 
-    # Mostrar imagen con superposición de Grad-CAM
+    # Superponer heatmap sobre imagen
     gradcam_image = save_and_display_gradcam(image, heatmap)
     st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
