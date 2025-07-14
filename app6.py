@@ -46,11 +46,10 @@ if uploaded_file is not None:
 
     # Grad-CAM heatmap
     heatmap = make_gradcam_heatmap(
-        img_batch,
-        gradcam_model,
-        last_conv_layer_name=None  # Ya usamos la salida de la capa convolucional directamente
+    img_batch,
+    gradcam_model
     )
-
+    
     # Visualización Grad-CAM
     gradcam_image = save_and_display_gradcam(image, heatmap)
     st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
