@@ -25,6 +25,7 @@ gradcam_model = Model(
     outputs=[last_conv_layer.output, model.layers[-1].output]
 )
 
+
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
 
 uploaded_file = st.file_uploader("Sube una imagen de la piel", type=["jpg", "jpeg", "png"])
@@ -44,9 +45,8 @@ if uploaded_file is not None:
 
     # Generar heatmap Grad-CAM
     heatmap = make_gradcam_heatmap(
-        np.expand_dims(img_array, axis=0),
-        gradcam_model
-    )
+        np.expand_dims(img_array, axis=0), 
+        gradcam_model)
 
     # Superponer heatmap sobre imagen
     gradcam_image = save_and_display_gradcam(image, heatmap)
