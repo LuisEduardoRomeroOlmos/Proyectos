@@ -25,4 +25,5 @@ def save_and_display_gradcam(img, heatmap, alpha=0.4):
     heatmap = np.uint8(255 * heatmap)
     heatmap_color = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
     superimposed_img = heatmap_color * alpha + img
-    return Image.fromarray(np.uint8(superimposed_img))
+    superimposed_img = np.clip(superimposed_img, 0, 255).astype(np.uint8)
+    return Image.fromarray(superimposed_img)
