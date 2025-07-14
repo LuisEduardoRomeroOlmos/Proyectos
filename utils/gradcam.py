@@ -16,7 +16,7 @@ def make_gradcam_heatmap(img_batch, model):
     # Suma ponderada de los mapas:
     heatmap = tf.reduce_sum(conv_outputs * pooled_grads, axis=-1)
     heatmap = tf.maximum(heatmap, 0) / (tf.reduce_max(heatmap) + 1e-10)
-    return heatmap.numpy(
+    return heatmap.numpy()
 
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
     img = img.resize((300, 300))
