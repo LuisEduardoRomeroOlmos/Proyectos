@@ -6,7 +6,7 @@ from utils.gradcam import make_gradcam_heatmap, save_and_display_gradcam
 from utils.preprocessing import preprocess_image
 
 # Carga del modelo
-model = tf.keras.models.load_model('model/melanoma_model.keras')
+model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
 
 st.set_page_config(page_title="Detección de Melanoma", layout="centered")
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
