@@ -10,7 +10,7 @@ from tensorflow.keras.models import Model
 model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
 
 # Llamar el modelo una vez con dummy input para que tenga .input y .output
-_ = model.predict(np.zeros((1, 224, 224, 3), dtype=np.float32))  # Ajusta el tamaño según tu input_shape
+_ = model.predict(np.zeros((1, 300, 300, 3), dtype=np.float32))  # Ajusta el tamaño según tu input_shape
 
 st.set_page_config(page_title="Detección de Melanoma", layout="centered")
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
