@@ -6,47 +6,50 @@ from tensorflow.keras.models import Model
 from utils.gradcam import make_gradcam_heatmap, save_and_display_gradcam
 from utils.preprocessing import preprocess_image
 
-# Carga el modelo completo
+# 1) Carga tu modelo Sequential (que tiene EfficientNet como primera capa)
 model = tf.keras.models.load_model('Modelos/Clasificacion_melanoma_V1_P2.keras')
 
-# Extrae la base_model (EfficientNet)
+# 2) Extrae el base_model (EfficientNet)
 base_model = model.layers[0]
 
-# Forzar llamada para definir input/output
-dummy_input = np.zeros((1, 300, 300, 3), dtype=np.float32)
-_ = model(dummy_input)
+# 3) Forzamos un forward pass para que Keras defina internamente inputs/outputs
+dummy = np.zeros((1, 300, 300, 3), dtype=np.float32)
+_ = model(dummy)
 
-# Obtener última capa convolucional de base_model
-last_conv_layer = base_model.get_layer("top_conv")
+# 4) Localiza la última capa convolucional dentro de base_model
+last_conv = base_model.get_layer("top_conv")
 
-# Crear modelo para GradCAM con dos salidas:
-# salida última capa conv y salida final del modelo completo
+# 5) Construye el modelo funcional para Grad‑CAM **usando model(base_model.input)**
+#    - inputs: mismo tensor de entrada que espera base_model
+#    - outputs: [salida de last_conv, salida final de model(base_model.input)]
 gradcam_model = Model(
     inputs=base_model.input,
-    outputs=[last_conv_layer.output, model.layers[-1].output]
+    outputs=[
+        last_conv.output,
+        model(base_model.input)   # aquí conectamos la entrada al modelo completo
+    ]
 )
 
+# --- Streamlit UI ---
 st.set_page_config(page_title="Detección de Melanoma", layout="centered")
 st.title("🩺 Clasificación de Melanoma con Grad-CAM")
 
 uploaded_file = st.file_uploader("Sube una imagen de la piel", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
+if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Imagen subida", use_container_width=True)
 
-    # Preprocesar imagen para el modelo
-    img_array = preprocess_image(image)  # debe devolver array con shape (300, 300, 3)
+    # Preprocesamiento igual al de entrenamiento
+    img_arr = preprocess_image(image)  # → (300, 300, 3)
+    batch = np.expand_dims(img_arr, axis=0)  # → (1, 300, 300, 3)
 
-    # Predecir con el modelo completo
-    pred = model.predict(np.expand_dims(img_array, axis=0))[0][0]
+    # Predicción normal
+    pred = model.predict(batch)[0][0]
     label = "Melanoma" if pred >= 0.5 else "No Melanoma"
-    conf = pred if pred >= 0.5 else 1 - pred
+    conf  = pred if pred >= 0.5 else 1 - pred
     st.write(f"**Predicción:** {label} ({conf*100:.2f}%)")
 
-    # Generar heatmap con el modelo gradcam_model
-    heatmap = make_gradcam_heatmap(np.expand_dims(img_array, axis=0), gradcam_model)
-
-    # Superponer heatmap sobre la imagen original
-    gradcam_image = save_and_display_gradcam(image, heatmap)
-    st.image(gradcam_image, caption="Grad-CAM", use_container_width=True)
+    # 🔥 Grad-CAM
+    heatmap = make_gradcam_heatmap(batch, gradcam_model)
+    gradcam_img = save_and_display_gradcam(image, heatmap)
+    st.image(gradcam_img, caption="Grad-CAM", use_container_width=True)
