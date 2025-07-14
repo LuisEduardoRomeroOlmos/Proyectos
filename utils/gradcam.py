@@ -3,20 +3,28 @@ from PIL import Image
 import matplotlib.cm as cm
 import tensorflow as tf
 
-def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
-    grad_model = tf.keras.models.Model(
-        [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
-    )
+def make_gradcam_heatmap(img_array, model):
+    # Forward pass
+    conv_outputs, predictions = model(img_array)
+    pred_index = tf.argmax(predictions[0])
+    
+    # Tape for gradient tracking
     with tf.GradientTape() as tape:
-        conv_outputs, predictions = grad_model(img_array)
-        loss = predictions[:, 0]
+        conv_outputs, predictions = model(img_array)
+        loss = predictions[:, pred_index]
 
     grads = tape.gradient(loss, conv_outputs)
+    
+    # Calcula pesos de los canales
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+
+    # Multiplica cada canal por su peso
     conv_outputs = conv_outputs[0]
     heatmap = conv_outputs @ pooled_grads[..., tf.newaxis]
     heatmap = tf.squeeze(heatmap)
-    heatmap = tf.maximum(heatmap, 0) / tf.reduce_max(heatmap)
+
+    # Normaliza entre 0 y 1
+    heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
 
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
