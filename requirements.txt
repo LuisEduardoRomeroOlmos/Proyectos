@@ -5,5 +5,3 @@ Pillow>=10.0.0
 wikipedia>=1.4.0
 fpdf
 matplotlib
-opencv-python
-opencv-python-headless==4.9.0.80
