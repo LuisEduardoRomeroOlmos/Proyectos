@@ -3,33 +3,30 @@ import numpy as np
 from PIL import Image
 import matplotlib.cm as cm
 
+import tensorflow as tf
+import numpy as np
+
 def make_gradcam_heatmap(img_batch, model):
-    """
-    img_batch: array shape (1, H, W, 3)
-    model: modelo funcional con dos salidas:
-        [conv_outputs, predictions]
-    """
     with tf.GradientTape() as tape:
-        # Forward pass único
         conv_outputs, preds = model(img_batch, training=False)
-        # Tomamos neurona 0 (sigmoide)
+        tape.watch(conv_outputs)
         class_channel = preds[:, 0]
 
-    # Gradiente de la neurona elegida con respecto a conv_outputs
     grads = tape.gradient(class_channel, conv_outputs)
+    
+    # ——— Añadimos prints de depuración ———
+    tf.print("conv_outputs shape:", tf.shape(conv_outputs))
+    tf.print("grads shape:", tf.shape(grads))
 
-    # Promedio espacial de gradientes
     pooled_grads = tf.reduce_mean(grads, axis=(0,1,2))
+    tf.print("pooled_grads shape:", tf.shape(pooled_grads))
+    # ————————————————————————————————
 
-    # Construir heatmap 2D
     conv_outputs = conv_outputs[0]
     heatmap = tf.reduce_sum(conv_outputs * pooled_grads, axis=-1)
-
-    # ReLU + normalización
-    heatmap = tf.maximum(heatmap, 0)
-    heatmap = heatmap / (tf.reduce_max(heatmap) + 1e-10)
-
+    heatmap = tf.maximum(heatmap, 0) / (tf.reduce_max(heatmap) + 1e-10)
     return heatmap.numpy()
+
 
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
     """
