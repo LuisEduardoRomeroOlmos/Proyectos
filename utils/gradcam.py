@@ -4,29 +4,23 @@ import matplotlib.cm as cm
 import tensorflow as tf
 
 def make_gradcam_heatmap(img_array, model):
-    # Forward pass
-    conv_outputs, predictions = model(img_array)
+    # model devuelve [conv_output, preds]
+    conv_output, predictions = model(img_array, training=False)
     pred_index = tf.argmax(predictions[0])
-    
-    # Tape for gradient tracking
+
     with tf.GradientTape() as tape:
-        conv_outputs, predictions = model(img_array)
-        loss = predictions[:, pred_index]
+        conv_output, predictions = model(img_array)
+        class_channel = predictions[:, pred_index]
 
-    grads = tape.gradient(loss, conv_outputs)
-    
-    # Calcula pesos de los canales
+    grads = tape.gradient(class_channel, conv_output)
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+    conv_output = conv_output[0]
 
-    # Multiplica cada canal por su peso
-    conv_outputs = conv_outputs[0]
-    heatmap = conv_outputs @ pooled_grads[..., tf.newaxis]
+    heatmap = conv_output @ pooled_grads[..., tf.newaxis]
     heatmap = tf.squeeze(heatmap)
-
-    # Normaliza entre 0 y 1
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
-
+    
 def save_and_display_gradcam(img, heatmap, alpha=0.4):
     img = img.resize((300, 300))
     heatmap = np.uint8(255 * heatmap)
